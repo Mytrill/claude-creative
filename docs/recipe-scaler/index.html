@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe Scaler — Scale Ingredients Up or Down</title>
+<meta name="description" content="Paste your ingredient list and scale it to any number of servings. Handles fractions like 1 1/2 cups and ½ automatically. Free, instant.">
+<link rel="canonical" href="https://spoonmath.com/recipe-scaler/">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Recipe Scaler","url":"https://spoonmath.com/recipe-scaler/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0"}}</script>
+</head>
+<body>
+<header><a href="../">🥄 Spoon<span>Math</span></a></header>
+<main>
+<h1>Recipe scaler</h1>
+<p class="sub">Paste your ingredient list, set the servings, and every quantity is rescaled — fractions included.</p>
+<div class="tool">
+<div class="row">
+<div class="field"><label for="from">Recipe serves</label><input type="number" id="from" value="4" min="0.1" step="any" inputmode="decimal"></div>
+<div class="field"><label for="to">I want to serve</label><input type="number" id="to" value="6" min="0.1" step="any" inputmode="decimal"></div>
+</div>
+<label for="input">Ingredients (one per line)</label>
+<textarea id="input" placeholder="2 cups flour
+1 1/2 tsp baking powder
+½ cup sugar
+3 eggs"></textarea>
+<label for="output" style="margin-top:12px">Scaled recipe</label>
+<textarea id="output" readonly></textarea>
+<div class="row" style="margin-top:12px"><button id="copy">Copy scaled recipe</button></div>
+</div>
+<h2>How it works</h2>
+<p class="sub">Each line's leading quantity ("2", "1 1/2", "½", "0.75") is multiplied by your scaling factor and rounded to a sensible fraction. Lines without a number (like "salt to taste") pass through unchanged. Tip: eggs and leaveners don't always scale linearly — round eggs to whole numbers and taste as you go.</p>
+<h2>FAQ</h2>
+<dl class="faq">
+<dt>Can I halve a recipe?</dt>
+<dd>Yes — set "recipe serves" to 2 and "I want to serve" to 1 (or 4 → 2). Any ratio works, including thirds.</dd>
+<dt>Does doubling change baking time?</dt>
+<dd>Not if you use two pans of the original size. One bigger, deeper pan bakes slower — check early and often. Our <a href="../cake-pan-converter/">cake pan converter</a> helps pick the pan.</dd>
+</dl>
+</main>
+<footer>
+<nav><a href="../">All tools</a> <a href="../cups-to-grams/">Cups to Grams</a> <a href="../cake-pan-converter/">Cake Pan Converter</a> <a href="../oven-temperature-converter/">Oven Temperatures</a></nav>
+<p>SpoonMath — free kitchen calculators.</p>
+</footer>
+<script>
+const UNI = {"½":.5,"⅓":1/3,"⅔":2/3,"¼":.25,"¾":.75,"⅕":.2,"⅛":.125,"⅜":.375,"⅝":.625,"⅞":.875};
+// matches leading: optional whole number, then unicode fraction | a/b | decimal
+const QTY = /^(\s*)(?:(\d+)\s+(\d+)\s*\/\s*(\d+)|(\d+)?\s*([½⅓⅔¼¾⅕⅛⅜⅝⅞])|(\d+)\s*\/\s*(\d+)|(\d*\.?\d+))/;
+function parseQty(line) {
+  const m = line.match(QTY);
+  if (!m) return null;
+  let v;
+  if (m[3]) v = +m[2] + m[3] / m[4];
+  else if (m[6]) v = (+m[5] || 0) + UNI[m[6]];
+  else if (m[7]) v = m[7] / m[8];
+  else v = +m[9];
+  return { value: v, rest: line.slice(m[0].length), lead: m[1] };
+}
+function fmt(v) {
+  const whole = Math.floor(v), frac = v - whole;
+  for (const [num, den] of [[0,1],[1,8],[1,4],[1,3],[3,8],[1,2],[5,8],[2,3],[3,4],[7,8],[1,1]]) {
+    if (Math.abs(frac - num / den) < 0.02) {
+      const w = whole + (num === den ? 1 : 0);
+      const f = num === 0 || num === den ? "" : `${num}/${den}`;
+      return w && f ? `${w} ${f}` : f || String(w);
+    }
+  }
+  return String(Math.round(v * 100) / 100);
+}
+function scale() {
+  const factor = parseFloat($("to").value) / parseFloat($("from").value);
+  if (!(factor > 0)) return;
+  $("output").value = $("input").value.split("\n").map(line => {
+    const q = parseQty(line);
+    return q ? q.lead + fmt(q.value * factor) + q.rest : line;
+  }).join("\n");
+}
+const $ = id => document.getElementById(id);
+["from", "to", "input"].forEach(id => $(id).addEventListener("input", scale));
+$("copy").addEventListener("click", () => navigator.clipboard.writeText($("output").value));
+scale();
+// ponytail: inline self-checks — the parser is the only non-trivial logic here
+console.assert(parseQty("1 1/2 cups flour").value === 1.5, "mixed fraction");
+console.assert(parseQty("½ tsp salt").value === 0.5, "unicode fraction");
+console.assert(parseQty("1½ cups").value === 1.5, "attached unicode");
+console.assert(parseQty("3/4 cup milk").value === 0.75, "bare fraction");
+console.assert(parseQty("0.75 l water").value === 0.75, "decimal");
+console.assert(parseQty("salt to taste") === null, "no quantity");
+console.assert(fmt(1.5) === "1 1/2" && fmt(0.75) === "3/4" && fmt(2) === "2" && fmt(1/3) === "1/3", "formatting");
+</script>
+</body>
+</html>

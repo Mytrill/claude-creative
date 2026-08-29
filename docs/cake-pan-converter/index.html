@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cake Pan Converter — Substitute Round, Square & Rectangular Pans</title>
+<meta name="description" content="Convert a recipe between cake pan sizes: round, square or rectangular, cm or inches. Get the exact batter multiplier and baking tips. Free.">
+<link rel="canonical" href="https://spoonmath.com/cake-pan-converter/">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Cake Pan Converter","url":"https://spoonmath.com/cake-pan-converter/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0"}}</script>
+</head>
+<body>
+<header><a href="../">🥄 Spoon<span>Math</span></a></header>
+<main>
+<h1>Cake pan converter</h1>
+<p class="sub">Recipe written for a pan you don't have? Compare the two pans' areas and scale the batter to match.</p>
+<div class="tool">
+<div class="row"><div class="field"><label for="unit">Measurements in</label><select id="unit"><option value="in">inches</option><option value="cm">cm</option></select></div></div>
+<h2 style="margin-top:4px">Recipe's pan</h2>
+<div class="row">
+<div class="field"><label for="s1">Shape</label><select id="s1"><option value="round">Round</option><option value="square">Square</option><option value="rect">Rectangular</option></select></div>
+<div class="field"><label for="a1" id="la1">Diameter</label><input type="number" id="a1" value="8" min="0" step="any" inputmode="decimal"></div>
+<div class="field" id="fb1" hidden><label for="b1">Length</label><input type="number" id="b1" value="13" min="0" step="any" inputmode="decimal"></div>
+</div>
+<h2>Your pan</h2>
+<div class="row">
+<div class="field"><label for="s2">Shape</label><select id="s2"><option value="round">Round</option><option value="square" selected>Square</option><option value="rect">Rectangular</option></select></div>
+<div class="field"><label for="a2" id="la2">Side</label><input type="number" id="a2" value="8" min="0" step="any" inputmode="decimal"></div>
+<div class="field" id="fb2" hidden><label for="b2">Length</label><input type="number" id="b2" value="13" min="0" step="any" inputmode="decimal"></div>
+</div>
+<div class="result" id="result" aria-live="polite"></div>
+</div>
+<h2>Common pan sizes compared</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Pan</th><th>Area</th><th>Closest substitute</th></tr></thead>
+<tbody>
+<tr><td>8 in (20 cm) round</td><td>50 in²</td><td>7 in square</td></tr>
+<tr><td>9 in (23 cm) round</td><td>64 in²</td><td>8 in square</td></tr>
+<tr><td>10 in (25 cm) round</td><td>79 in²</td><td>9 in square</td></tr>
+<tr><td>8 in (20 cm) square</td><td>64 in²</td><td>9 in round</td></tr>
+<tr><td>9 in (23 cm) square</td><td>81 in²</td><td>10 in round</td></tr>
+<tr><td>9 × 13 in (23 × 33 cm)</td><td>117 in²</td><td>two 9 in rounds</td></tr>
+</tbody>
+</table></div>
+<h2>FAQ</h2>
+<dl class="faq">
+<dt>Does baking time change?</dt>
+<dd>If the batter ends up shallower it bakes faster; deeper bakes slower. Start checking 10 minutes early, or drop the oven ~15 °C / 25 °F for much deeper batter.</dd>
+<dt>What about loaf, bundt or springform pans?</dt>
+<dd>Those depend on volume, not just area. A springform converts like a regular round pan of the same diameter; loaf and bundt pans don't convert reliably by area — match volume with water if you can.</dd>
+</dl>
+</main>
+<footer>
+<nav><a href="../">All tools</a> <a href="../recipe-scaler/">Recipe Scaler</a> <a href="../oven-temperature-converter/">Oven Temperatures</a> <a href="../cups-to-grams/">Cups to Grams</a></nav>
+<p>SpoonMath — free kitchen calculators.</p>
+</footer>
+<script>
+const $ = id => document.getElementById(id);
+function area(shape, a, b) {
+  return shape === "round" ? Math.PI * a * a / 4 : shape === "square" ? a * a : a * b;
+}
+function syncLabels(n) {
+  const shape = $("s" + n).value;
+  $("la" + n).textContent = shape === "round" ? "Diameter" : shape === "square" ? "Side" : "Width";
+  $("fb" + n).hidden = shape !== "rect";
+}
+function update() {
+  syncLabels(1); syncLabels(2);
+  const A1 = area($("s1").value, +$("a1").value, +$("b1").value);
+  const A2 = area($("s2").value, +$("a2").value, +$("b2").value);
+  if (!(A1 > 0 && A2 > 0)) { $("result").textContent = ""; return; }
+  const r = A2 / A1, pct = Math.round(r * 100);
+  let advice;
+  if (pct >= 90 && pct <= 110) advice = "Close enough — use the recipe as is.";
+  else if (r > 1) advice = `Multiply all ingredients by ${Math.round(r * 100) / 100} (or expect a thinner cake — check early).`;
+  else advice = `Use ${Math.round(r * 100) / 100}× the recipe (or expect a taller cake — it may need longer).`;
+  $("result").innerHTML = `Your pan is <b>${pct}%</b> of the recipe's pan<small>${advice}</small>`;
+}
+["s1","a1","b1","s2","a2","b2","unit"].forEach(id => $(id).addEventListener("input", update));
+update();
+// ponytail: self-checks
+console.assert(Math.abs(area("round", 9) / area("square", 8) - 0.994) < 0.01, "9in round ~ 8in square");
+console.assert(area("rect", 9, 13) === 117, "9x13");
+</script>
+</body>
+</html>

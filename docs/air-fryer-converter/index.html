@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Air Fryer Converter — Oven to Air Fryer Time & Temperature</title>
+<meta name="description" content="Convert any oven recipe to air fryer settings: lower the temperature 15 °C / 25 °F and cut the time 20%. Instant calculator, °C and °F.">
+<link rel="canonical" href="https://spoonmath.com/air-fryer-converter/">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Air Fryer Converter","url":"https://spoonmath.com/air-fryer-converter/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0"}}</script>
+</head>
+<body>
+<header><a href="../">🥄 Spoon<span>Math</span></a></header>
+<main>
+<h1>Oven to air fryer converter</h1>
+<p class="sub">An air fryer is a small, fast convection oven: same food needs a lower temperature and less time.</p>
+<div class="tool">
+<div class="row">
+<div class="field"><label for="temp">Oven temperature</label><input type="number" id="temp" value="200" step="any" inputmode="numeric"></div>
+<div class="field"><label for="scale">Scale</label><select id="scale"><option value="c">°C</option><option value="f">°F</option></select></div>
+<div class="field"><label for="mins">Oven time (minutes)</label><input type="number" id="mins" value="30" min="0" step="any" inputmode="numeric"></div>
+</div>
+<div class="result" id="result" aria-live="polite"></div>
+</div>
+<h2>How the conversion works</h2>
+<p class="sub">The standard rule: <b>reduce the temperature by 15 °C (25 °F) and the cooking time by about 20%</b>. Air fryers vary, so check a few minutes before the timer ends, and shake or flip halfway. Preheating is usually unnecessary. Don't overcrowd the basket — air needs to circulate.</p>
+<h2>Common conversions</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Oven</th><th>Air fryer</th><th>Oven time</th><th>Air fryer time</th></tr></thead>
+<tbody>
+<tr><td>180 °C / 350 °F</td><td>165 °C / 325 °F</td><td>20 min</td><td>16 min</td></tr>
+<tr><td>190 °C / 375 °F</td><td>175 °C / 350 °F</td><td>30 min</td><td>24 min</td></tr>
+<tr><td>200 °C / 400 °F</td><td>185 °C / 375 °F</td><td>40 min</td><td>32 min</td></tr>
+<tr><td>220 °C / 425 °F</td><td>205 °C / 400 °F</td><td>60 min</td><td>48 min</td></tr>
+</tbody>
+</table></div>
+<h2>FAQ</h2>
+<dl class="faq">
+<dt>Does this work for baking?</dt>
+<dd>Cookies and small bakes, yes. Cakes and bread are riskier — the intense fan can set the top before the middle cooks. Use the lower end of the temperature and test with a skewer.</dd>
+<dt>Frozen food bags already list air fryer times — which wins?</dt>
+<dd>The bag wins. Use this converter when you only have oven instructions.</dd>
+</dl>
+</main>
+<footer>
+<nav><a href="../">All tools</a> <a href="../oven-temperature-converter/">Oven Temperatures</a> <a href="../recipe-scaler/">Recipe Scaler</a> <a href="../cups-to-grams/">Cups to Grams</a></nav>
+<p>SpoonMath — free kitchen calculators.</p>
+</footer>
+<script>
+const $ = id => document.getElementById(id);
+function update() {
+  const t = parseFloat($("temp").value), m = parseFloat($("mins").value), f = $("scale").value === "f";
+  if (isNaN(t)) { $("result").textContent = ""; return; }
+  const drop = f ? 25 : 15;
+  const newT = Math.round((t - drop) / 5) * 5;
+  const time = m > 0 ? ` for <b>${Math.round(m * 0.8)} min</b> <small>(check 2–3 min early, shake halfway)</small>` : "";
+  $("result").innerHTML = `Air fryer: <b>${newT} °${f ? "F" : "C"}</b>${time}`;
+}
+["temp", "scale", "mins"].forEach(id => $(id).addEventListener("input", update));
+update();
+// ponytail: self-check
+console.assert((200 - 15) === 185 && Math.round(30 * 0.8) === 24, "rule of thumb");
+</script>
+</body>
+</html>

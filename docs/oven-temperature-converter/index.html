@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oven Temperature Converter — Celsius, Fahrenheit, Fan & Gas Mark</title>
+<meta name="description" content="Convert oven temperatures between Celsius, Fahrenheit, fan/convection ovens and gas marks. Instant converter plus full reference chart.">
+<link rel="canonical" href="https://spoonmath.com/oven-temperature-converter/">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Oven Temperature Converter","url":"https://spoonmath.com/oven-temperature-converter/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0"}}</script>
+</head>
+<body>
+<header><a href="../">🥄 Spoon<span>Math</span></a></header>
+<main>
+<h1>Oven temperature converter</h1>
+<p class="sub">Celsius, Fahrenheit, fan oven or gas mark — enter one, get the rest.</p>
+<div class="tool">
+<div class="row">
+<div class="field"><label for="temp">Temperature</label><input type="number" id="temp" value="180" step="any" inputmode="numeric"></div>
+<div class="field"><label for="scale">Scale</label><select id="scale">
+<option value="c">°C (conventional)</option>
+<option value="f">°F</option>
+<option value="fan">°C fan / convection</option>
+</select></div>
+</div>
+<div class="result" id="result" aria-live="polite"></div>
+</div>
+<h2>Oven temperature chart</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Gas mark</th><th>°C</th><th>°C fan</th><th>°F</th><th>Description</th></tr></thead>
+<tbody id="chart"></tbody>
+</table></div>
+<h2>FAQ</h2>
+<dl class="faq">
+<dt>Why do fan ovens use lower temperatures?</dt>
+<dd>The fan circulates hot air, transferring heat faster. The rule of thumb: set a fan oven 20 °C (about 25–50 °F) lower than the conventional temperature in the recipe.</dd>
+<dt>My oven only shows Fahrenheit — is 350 °F the same as 180 °C?</dt>
+<dd>350 °F is 177 °C; recipes round it to 180 °C. The 3-degree difference doesn't matter in practice.</dd>
+</dl>
+</main>
+<footer>
+<nav><a href="../">All tools</a> <a href="../air-fryer-converter/">Air Fryer Converter</a> <a href="../cake-pan-converter/">Cake Pan Converter</a> <a href="../cups-to-grams/">Cups to Grams</a></nav>
+<p>SpoonMath — free kitchen calculators.</p>
+</footer>
+<script>
+const GAS = [["¼",110,"Very cool"],["½",120,"Very cool"],["1",140,"Cool"],["2",150,"Cool"],["3",170,"Moderate"],["4",180,"Moderate"],["5",190,"Moderately hot"],["6",200,"Moderately hot"],["7",220,"Hot"],["8",230,"Hot"],["9",240,"Very hot"]];
+const $ = id => document.getElementById(id);
+const c2f = c => c * 9 / 5 + 32, f2c = f => (f - 32) * 5 / 9;
+$("chart").innerHTML = GAS.map(([g, c, d]) =>
+  `<tr><td>${g}</td><td>${c} °C</td><td>${c - 20} °C</td><td>${Math.round(c2f(c) / 5) * 5} °F</td><td>${d}</td></tr>`).join("");
+function nearestGas(c) {
+  let best = GAS[0];
+  for (const row of GAS) if (Math.abs(row[1] - c) < Math.abs(best[1] - c)) best = row;
+  return Math.abs(best[1] - c) <= 10 ? `gas mark ${best[0]}` : "outside gas mark range";
+}
+function update() {
+  const v = parseFloat($("temp").value), s = $("scale").value;
+  if (isNaN(v)) { $("result").textContent = ""; return; }
+  const c = s === "f" ? f2c(v) : s === "fan" ? v + 20 : v;
+  $("result").innerHTML = `<b>${Math.round(c)} °C</b> · ${Math.round(c - 20)} °C fan · ${Math.round(c2f(c))} °F<small>${nearestGas(c)}</small>`;
+}
+["temp", "scale"].forEach(id => $(id).addEventListener("input", update));
+update();
+// ponytail: self-checks
+console.assert(Math.round(c2f(180)) === 356 && Math.round(f2c(350)) === 177, "C/F math");
+console.assert(nearestGas(180) === "gas mark 4", "gas mark lookup");
+</script>
+</body>
+</html>

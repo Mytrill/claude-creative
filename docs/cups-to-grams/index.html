@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cups to Grams Converter — Flour, Sugar, Butter & More</title>
+<meta name="description" content="Convert cups, tablespoons and teaspoons to grams for flour, sugar, butter and 20+ baking ingredients. Instant, accurate, free.">
+<link rel="canonical" href="https://spoonmath.com/cups-to-grams/">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Cups to Grams Converter","url":"https://spoonmath.com/cups-to-grams/","applicationCategory":"UtilityApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0"}}</script>
+</head>
+<body>
+<header><a href="../">🥄 Spoon<span>Math</span></a></header>
+<main>
+<h1>Cups to grams converter</h1>
+<p class="sub">Cups are a volume, grams are a weight — so the answer depends on the ingredient. Pick yours below.</p>
+<div class="tool">
+<div class="row">
+<div class="field"><label for="amount">Amount</label><input type="number" id="amount" value="1" min="0" step="any" inputmode="decimal"></div>
+<div class="field"><label for="unit">Unit</label><select id="unit">
+<option value="1">cups</option>
+<option value="0.0625">tablespoons</option>
+<option value="0.02083">teaspoons</option>
+<option value="g">grams (to cups)</option>
+</select></div>
+<div class="field"><label for="ingredient">Ingredient</label><select id="ingredient"></select></div>
+</div>
+<div class="result" id="result" aria-live="polite"></div>
+</div>
+<h2>Conversion chart: 1 cup in grams</h2>
+<p class="sub">US cups, ingredients spooned and leveled. Values rounded; sources vary by a few grams.</p>
+<div class="tablewrap"><table id="chart">
+<thead><tr><th>Ingredient</th><th>1 cup</th><th>1 tbsp</th></tr></thead>
+<tbody></tbody>
+</table></div>
+<h2>FAQ</h2>
+<dl class="faq">
+<dt>Why is 1 cup of flour only 120 g but 1 cup of sugar 200 g?</dt>
+<dd>Density. Sugar crystals pack tightly; flour traps air. Same volume, different weight — that's why gram measurements make baking more reliable.</dd>
+<dt>US cup or metric cup?</dt>
+<dd>This tool uses the US cup (236.6 ml). A metric cup is 250 ml — multiply results by 1.06 if your recipe uses metric cups.</dd>
+<dt>Scooped or spooned flour?</dt>
+<dd>Values assume flour spooned into the cup and leveled. Scooping directly packs the flour and can add 20–30 g per cup.</dd>
+</dl>
+</main>
+<footer>
+<nav><a href="../">All tools</a> <a href="../recipe-scaler/">Recipe Scaler</a> <a href="../cake-pan-converter/">Cake Pan Converter</a> <a href="../oven-temperature-converter/">Oven Temperatures</a></nav>
+<p>SpoonMath — free kitchen calculators.</p>
+</footer>
+<script>
+const DENSITIES = [ // grams per US cup, spooned & leveled
+  ["All-purpose flour", 120], ["Bread flour", 120], ["Cake flour", 114],
+  ["Whole wheat flour", 113], ["Almond flour", 96], ["Granulated sugar", 200],
+  ["Brown sugar (packed)", 213], ["Powdered sugar", 113], ["Butter", 227],
+  ["Honey", 340], ["Maple syrup", 312], ["Milk", 240], ["Water", 237],
+  ["Vegetable oil", 218], ["Cocoa powder", 85], ["Rolled oats", 90],
+  ["Cornstarch", 125], ["White rice (uncooked)", 185], ["Table salt", 288],
+  ["Peanut butter", 258], ["Yogurt", 245], ["Sour cream", 230],
+  ["Heavy cream", 238], ["Cream cheese", 226], ["Chocolate chips", 170],
+  ["Shredded cheese", 113], ["Desiccated coconut", 85], ["Breadcrumbs (dry)", 108],
+];
+const $ = id => document.getElementById(id);
+const sel = $("ingredient"), tbody = document.querySelector("#chart tbody");
+DENSITIES.forEach(([name, g], i) => {
+  sel.add(new Option(name, i));
+  tbody.insertAdjacentHTML("beforeend",
+    `<tr><td>${name}</td><td>${g} g</td><td>${Math.round(g / 16 * 10) / 10} g</td></tr>`);
+});
+function update() {
+  const amt = parseFloat($("amount").value), unit = $("unit").value;
+  const [name, perCup] = DENSITIES[sel.value];
+  if (!(amt >= 0)) { $("result").textContent = ""; return; }
+  if (unit === "g") {
+    const cups = amt / perCup;
+    $("result").innerHTML = `${amt} g of ${name.toLowerCase()} = <b>${cups < 0.1 ? cups.toFixed(3) : cups.toFixed(2)} cups</b><small>${Math.round(cups * 16 * 10) / 10} tablespoons</small>`;
+  } else {
+    const g = amt * parseFloat(unit) * perCup;
+    $("result").innerHTML = `= <b>${g < 10 ? g.toFixed(1) : Math.round(g)} g</b><small>${(g / 28.3495).toFixed(2)} oz</small>`;
+  }
+}
+["amount", "unit", "ingredient"].forEach(id => $(id).addEventListener("input", update));
+update();
+</script>
+</body>
+</html>
